@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import './App.css'
 
 export default function App() {
@@ -94,11 +94,7 @@ export default function App() {
             />
           </div>
 
-          <div className="pi-output">
-            {result.digits > 500
-              ? `${result.pi.slice(0, 102)}\n[...省略中间...]\n${result.pi.slice(-100)}`
-              : result.pi}
-          </div>
+          <PiVirtualList pi={result.pi} />
         </>
       )}
     </div>
@@ -110,6 +106,50 @@ function Stat({ label, value }) {
     <div className="stat">
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
+    </div>
+  )
+}
+
+const CHARS_PER_ROW = 80
+const ROW_HEIGHT = 22
+const MAX_CONTAINER_HEIGHT = 330
+const OVERSCAN = 3
+
+function PiVirtualList({ pi }) {
+  const [scrollTop, setScrollTop] = useState(0)
+
+  const numRows = Math.ceil(pi.length / CHARS_PER_ROW)
+  const totalHeight = numRows * ROW_HEIGHT
+  const containerHeight = Math.min(MAX_CONTAINER_HEIGHT, totalHeight)
+
+  const firstRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN)
+  const lastRow = Math.min(numRows, Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + OVERSCAN)
+
+  const rows = useMemo(() => {
+    const items = []
+    for (let i = firstRow; i < lastRow; i++) {
+      const start = i * CHARS_PER_ROW
+      items.push({ i, start, text: pi.slice(start, start + CHARS_PER_ROW) })
+    }
+    return items
+  }, [pi, firstRow, lastRow])
+
+  return (
+    <div
+      className="pi-virtual"
+      style={{ height: containerHeight }}
+      onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
+    >
+      <div style={{ height: totalHeight, position: 'relative' }}>
+        <div style={{ position: 'absolute', top: firstRow * ROW_HEIGHT, width: '100%' }}>
+          {rows.map(({ i, start, text }) => (
+            <div key={i} className="pi-row">
+              <span className="pi-row-idx">{start}</span>
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
