@@ -103,6 +103,26 @@ h1 {
   font-weight: 500;
 }
 
+.verify-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.verify-ok {
+  background: #e6f4ea;
+  color: #2e7d32;
+}
+
+.verify-fail {
+  background: #fce8e6;
+  color: #c62828;
+}
+
 .pi-virtual {
   font-family: monospace;
   font-size: 13px;

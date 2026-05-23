@@ -1,6 +1,24 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import './App.css'
 
+// First 50 decimal digits of π — used as a reference for quick verification.
+// Feynman Point: decimal digits 762–767 are "999999" (string indices 763–768).
+const PI_REF_50 = '3.14159265358979323846264338327950288419716939937510'
+
+function verifyPi(pi) {
+  const checkLen = Math.min(pi.length, PI_REF_50.length)
+  if (pi.slice(0, checkLen) !== PI_REF_50.slice(0, checkLen)) {
+    return { ok: false, note: 'first 50 digits mismatch' }
+  }
+  if (pi.length >= 769) {
+    if (pi.slice(763, 769) !== '999999') {
+      return { ok: false, note: 'Feynman Point mismatch at decimal 762–767' }
+    }
+    return { ok: true, note: 'first 50 digits ✓  ·  Feynman Point (d762) ✓' }
+  }
+  return { ok: true, note: 'first 50 digits ✓' }
+}
+
 export default function App() {
   const [digits, setDigits] = useState(10000)
   const [status, setStatus] = useState('loading')
@@ -26,7 +44,7 @@ export default function App() {
       } else if (type === 'done') {
         setProgress(100)
         lastPiRef.current = pi
-        setResult({ pi, ms, digits: d })
+        setResult({ pi, ms, digits: d, verified: verifyPi(pi) })
         setStatus('done')
       }
     }
@@ -92,6 +110,10 @@ export default function App() {
               label="速度"
               value={`${Math.round(result.digits / (result.ms / 1000)).toLocaleString()} d/s`}
             />
+          </div>
+
+          <div className={`verify-badge ${result.verified.ok ? 'verify-ok' : 'verify-fail'}`}>
+            {result.verified.ok ? '✓' : '✗'} {result.verified.note}
           </div>
 
           <PiVirtualList pi={result.pi} />
