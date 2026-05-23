@@ -1,0 +1,12 @@
+# Rust
+pi-wasm/target/
+
+# wasm-pack 输出（由构建生成）
+pi-wasm/pkg/
+
+# Node
+pi-wasm/pi-app/node_modules/
+pi-wasm/pi-app/dist/
+
+# macOS
+.DS_Store
