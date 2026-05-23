@@ -1,0 +1,5 @@
+gmp-*.tar.xz
+gmp-6*/
+gmp-install/
+www/pi_gmp.js
+www/pi_gmp.wasm
