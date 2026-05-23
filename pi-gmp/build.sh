@@ -66,9 +66,9 @@ emcc pi_gmp.c \
   -o www/pi_gmp.js
 
 echo ""
-echo "=== 产物 ==="
+echo "=== Build output ==="
 ls -lh www/pi_gmp.js www/pi_gmp.wasm
 
 echo ""
-echo "=== 启动开发服务器（http://localhost:8080）==="
-python3 -m http.server 8080 --directory www
+echo "=== Run the frontend ==="
+echo "  cd pi-app && npm install && npm run dev"
