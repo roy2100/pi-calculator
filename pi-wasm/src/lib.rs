@@ -67,7 +67,6 @@ fn finish_pi(bs: BSResult, digits: u64) -> String {
     format!("{}.{}", &s[0..1], &s[1..digits as usize + 1])
 }
 
-// 单线程版本（用于小位数或后备）
 #[wasm_bindgen]
 pub fn compute_pi(digits: u32) -> String {
     let digits = digits as u64;
@@ -76,31 +75,3 @@ pub fn compute_pi(digits: u32) -> String {
     finish_pi(bs, digits)
 }
 
-// 并行版本：计算指定区间的 binary_split，以 pipe 分隔的十进制字符串返回
-// 格式："p|q|t"
-#[wasm_bindgen]
-pub fn compute_split(a: u64, b: u64) -> String {
-    let bs = binary_split(a, b);
-    format!("{}|{}|{}", bs.p, bs.q, bs.t)
-}
-
-// 并行版本：接受左右两半的 p/q/t 字符串，合并后输出 pi
-#[wasm_bindgen]
-pub fn compute_pi_from_halves(
-    digits: u32,
-    lp: &str, lq: &str, lt: &str,
-    rp: &str, rq: &str, rt: &str,
-) -> String {
-    let l = BSResult {
-        p: lp.parse().unwrap_or(IBig::ONE),
-        q: lq.parse().unwrap_or(IBig::ONE),
-        t: lt.parse().unwrap_or(IBig::ZERO),
-    };
-    let r = BSResult {
-        p: rp.parse().unwrap_or(IBig::ONE),
-        q: rq.parse().unwrap_or(IBig::ONE),
-        t: rt.parse().unwrap_or(IBig::ZERO),
-    };
-    let bs = combine(l, r);
-    finish_pi(bs, digits as u64)
-}

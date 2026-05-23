@@ -6,7 +6,6 @@ export default function App() {
   const [status, setStatus] = useState('loading')
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState(null)
-  const [threads, setThreads] = useState(0)
   const workerRef = useRef(null)
   const jobIdRef = useRef(0)
   const lastPiRef = useRef('')
@@ -16,9 +15,8 @@ export default function App() {
     workerRef.current = worker
 
     worker.onmessage = ({ data }) => {
-      const { type, pi, ms, digits: d, pct, msg, threads: t } = data
+      const { type, pi, ms, digits: d, pct, msg } = data
       if (type === 'ready') {
-        setThreads(t)
         setStatus('ready')
       } else if (type === 'progress') {
         setProgress(pct)
@@ -54,8 +52,7 @@ export default function App() {
     <div className="container">
       <h1>π WASM 计算器</h1>
       <p className="subtitle">
-        Rust + dashu + Rayon · Chudnovsky + Binary Splitting
-        {threads > 0 && <span className="badge">{threads} 线程</span>}
+        Rust + dashu · Chudnovsky + Binary Splitting
       </p>
 
       <div className="controls">

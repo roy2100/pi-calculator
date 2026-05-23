@@ -7,5 +7,6 @@ wasm-pack build --target web --release
 echo "=== 检查产物大小 ==="
 ls -lh pkg/*.wasm
 
-echo "=== 启动本地开发服务器 ==="
-python3 -m http.server 8080 --directory www
+echo "=== 启动 Vite 开发服务器 ==="
+cd pi-app
+npm run dev
