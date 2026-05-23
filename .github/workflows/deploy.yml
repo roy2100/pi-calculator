@@ -20,40 +20,68 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
         with:
-          targets: wasm32-unknown-unknown
+          actions-cache-folder: emsdk-cache
 
-      - name: Cache Rust
+      - name: Cache GMP build
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            pi-wasm/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('pi-wasm/Cargo.lock') }}
+          path: pi-gmp/gmp-install
+          key: gmp-6.3.0-${{ runner.os }}-v1
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Build GMP
+        working-directory: pi-gmp
+        run: |
+          GMP_VERSION="6.3.0"
+          GMP_DIR="gmp-${GMP_VERSION}"
+          GMP_ARCHIVE="${GMP_DIR}.tar.xz"
+          GMP_INSTALL="$(pwd)/gmp-install"
+          if [ ! -f "$GMP_INSTALL/lib/libgmp.a" ]; then
+            [ -f "$GMP_ARCHIVE" ] || curl -LO "https://gmplib.org/download/gmp/${GMP_ARCHIVE}"
+            [ -d "$GMP_DIR" ] || tar xf "$GMP_ARCHIVE"
+            cd "$GMP_DIR"
+            emconfigure ./configure \
+              --disable-assembly --host=none \
+              --prefix="$GMP_INSTALL" \
+              --disable-shared --enable-static --with-pic
+            emmake make -j$(nproc)
+            emmake make install
+          fi
 
-      - name: Build WASM
-        working-directory: pi-wasm
-        run: wasm-pack build --target web --release
+      - name: Build pi_gmp WASM
+        working-directory: pi-gmp
+        run: |
+          GMP_INSTALL="$(pwd)/gmp-install"
+          mkdir -p www
+          emcc pi_gmp.c \
+            -I "${GMP_INSTALL}/include" \
+            "${GMP_INSTALL}/lib/libgmp.a" \
+            -O3 \
+            -s MODULARIZE=1 \
+            -s EXPORT_NAME='createPiModule' \
+            -s EXPORTED_FUNCTIONS='["_compute_pi","_free_string"]' \
+            -s EXPORTED_RUNTIME_METHODS='["ccall","UTF8ToString"]' \
+            -s ALLOW_MEMORY_GROWTH=1 \
+            -s INITIAL_MEMORY=67108864 \
+            -s MAXIMUM_MEMORY=2147483648 \
+            -s STACK_SIZE=5242880 \
+            -o www/pi_gmp.js
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: pi-wasm/pi-app/package-lock.json
+          cache-dependency-path: pi-gmp/pi-app/package-lock.json
 
       - name: Install dependencies
-        working-directory: pi-wasm/pi-app
+        working-directory: pi-gmp/pi-app
         run: npm ci
 
       - name: Build frontend
-        working-directory: pi-wasm/pi-app
+        working-directory: pi-gmp/pi-app
         env:
           VITE_BASE_URL: /${{ github.event.repository.name }}/
         run: npm run build
@@ -61,7 +89,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: pi-wasm/pi-app/dist
+          path: pi-gmp/pi-app/dist
 
   deploy:
     needs: build

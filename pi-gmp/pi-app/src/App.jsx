@@ -11,7 +11,7 @@ export default function App() {
   const lastPiRef = useRef('')
 
   useEffect(() => {
-    const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' })
+    const worker = new Worker(import.meta.env.BASE_URL + 'worker.js')
     workerRef.current = worker
 
     worker.onmessage = ({ data }) => {
@@ -52,7 +52,7 @@ export default function App() {
     <div className="container">
       <h1>π WASM 计算器</h1>
       <p className="subtitle">
-        Rust + dashu · Chudnovsky + Binary Splitting
+        C + GMP · Emscripten · Chudnovsky + Binary Splitting
       </p>
 
       <div className="controls">
