@@ -1,5 +1,7 @@
 # π Calculator
 
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](LICENSE)
+
 A high-performance π calculator running entirely in the browser via WebAssembly.
 
 **[Live Demo](https://nanlei.github.io/pi-calculator/)**
@@ -64,6 +66,12 @@ npm run dev
 cd pi-gmp/pi-app
 npm run build   # output in dist/
 ```
+
+## License
+
+This project is licensed under the [GNU Lesser General Public License v3.0](LICENSE).
+
+The compiled WebAssembly binary incorporates [GMP](https://gmplib.org/) (GNU Multiple Precision Arithmetic Library), which is also licensed under LGPL v3. The build scripts in this repository allow you to recompile the WASM from source with a modified version of GMP, as required by the LGPL.
 
 ## Deployment
 
