@@ -13,12 +13,12 @@
 
 body {
   margin: 0;
-  background: #F3F3F3;
+  background: #FAFAFA;
 }
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #202020;
+    background: #111111;
   }
 }
 

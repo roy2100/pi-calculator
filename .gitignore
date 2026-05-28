@@ -10,3 +10,4 @@ pi-wasm/pi-app/dist/
 
 # macOS
 .DS_Store
+.playwright-mcp
